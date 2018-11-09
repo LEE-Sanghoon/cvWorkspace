@@ -10,7 +10,5 @@ int image_channels(Mat &src, Mat &dst) {
 	imshow("green channel", bgr[1]);
 	imshow("red channel", bgr[2]);
 
-	waitKey(0);
-
 	return 0;
 }

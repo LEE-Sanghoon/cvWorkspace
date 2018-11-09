@@ -112,7 +112,9 @@ int main(int argc, char* argv[])
 
 				if (function != NULL) {
 					function(gMainWndImage, resultImage);
-					imshow("RESULT IMAGE", resultImage);
+
+					if (resultImage.data)
+						imshow("RESULT IMAGE", resultImage);
 				}
 			}
 
