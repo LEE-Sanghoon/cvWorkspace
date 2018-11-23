@@ -23,20 +23,28 @@ const string keys =
 "{help h ?        |               | print this message}"
 "{algorithm A     |               | }"
 "{source S        | image         | input source type(image / camera / video)}"
-"{@argument1      | lenna.jpg     | input file name}"
-"{@argument2      | output.jpg    | output file name}"
+"{@argument1      |               | input file name}"
+"{@argument2      |               | output file name}"
 ;
 
 
-Mat				gMainWndImage;
-VideoCapture	gMainCapture;
+Mat				_source_image;
+Mat				_operand_image;
+VideoCapture	_capture;
 
-// 알고리즘 함수 원형 선언
+
+// (1) 알고리즘 함수 원형 선언
 int image_channels(Mat &src, Mat &dst);
+int mat_abs(Mat &, Mat &);
+int min_max(Mat &, Mat &);
+
 
 int main(int argc, char* argv[])
 {
+	// (2) 알고리즘 함수 등록, (3) 프로젝트 속성 --> 디버거 --> -algorithm="***" 변경
 	register_algorithm("image_channels", image_channels);
+	register_algorithm("mat_abs", mat_abs);
+	register_algorithm("min_max", min_max);
 
 #ifndef _DEBUG
 	FreeConsole();
@@ -60,17 +68,24 @@ int main(int argc, char* argv[])
 
 	string source = parser.get<string>("source");
 	if (source.compare(SRC_FROM_CAMERA) == 0) {
-		gMainCapture.open(0);
-		CV_Assert(gMainCapture.isOpened());
+		_capture.open(0);
+		CV_Assert(_capture.isOpened());
+
+		_operand_image = imread(argument1);
 	}
 	else if (source.compare(SRC_FROM_VIDEO) == 0) {
-		gMainCapture.open(argument1);
-		CV_Assert(gMainCapture.isOpened());
+		_capture.open(argument1);
+		CV_Assert(_capture.isOpened());
+
+		_operand_image = imread(argument2);
 	}
 	else {
-		gMainWndImage = imread(argument1);
-		CV_Assert(gMainWndImage.data);
+		_source_image = imread(argument1);
+		CV_Assert(_source_image.data);
+
+		_operand_image = imread(argument2);
 	}
+
 
 
 	try {
@@ -89,10 +104,10 @@ int main(int argc, char* argv[])
 			if (cmdKey == 27) // ESC
 				break;
 
-			if (gMainCapture.isOpened())
-				gMainCapture >> gMainWndImage;
+			if (_capture.isOpened())
+				_capture >> _source_image;
 			
-			imshow(MAIN_WINDOW_TITLE, gMainWndImage);
+			imshow(MAIN_WINDOW_TITLE, _source_image);
 
 
 			switch (cmdKey) {
@@ -111,7 +126,11 @@ int main(int argc, char* argv[])
 				FUNCTION function = get_algorithm(algorithm);
 
 				if (function != NULL) {
-					function(gMainWndImage, resultImage);
+
+					if (_operand_image.data)
+						resultImage = _operand_image;
+
+					function(_source_image, resultImage);
 
 					if (resultImage.data)
 						imshow("RESULT IMAGE", resultImage);
@@ -119,7 +138,14 @@ int main(int argc, char* argv[])
 			}
 
 			if (bSave) {
+				
+				if (_source_image.data)
+					imwrite("source.jpg", _source_image);
 
+				if (resultImage.data)
+					imwrite("result.jpb", resultImage);
+
+				bSave = false;
 			}
 		}
 	}
