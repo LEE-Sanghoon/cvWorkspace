@@ -18,6 +18,7 @@ using namespace cv;
 #define SRC_FROM_IMAGE		"image"
 #define SRC_FROM_VIDEO		"video"
 
+// 실행 명령 인수의 예: -algorithm=image_channels res\color.jpg res\ouput.jpg
 
 const string keys =
 "{help h ?        |               | print this message}"
@@ -143,7 +144,7 @@ int main(int argc, char* argv[])
 					imwrite("source.jpg", _source_image);
 
 				if (resultImage.data)
-					imwrite("result.jpb", resultImage);
+					imwrite("result.jpg", resultImage);
 
 				bSave = false;
 			}
